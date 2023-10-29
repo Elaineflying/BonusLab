@@ -19,6 +19,7 @@ Imports:
     plyr,
     dplyr,
     nycflights13,
+    magrittr,
     ggplot2,
     methods
 Suggests: 

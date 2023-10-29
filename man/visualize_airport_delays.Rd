@@ -18,8 +18,3 @@ The function loads the nycflights13 dataset, filters out missing latitude and lo
 \examples{
 visualize_airport_delays()
 }
-\seealso{
-\code{\link{ggplot2}}
-
-\code{\link{nycflights13}}
-}

@@ -1,20 +1,19 @@
 #' Visualize Airport Delays
 #' @description This function creates a plot that visualizes the mean delay of flights for different airports by longitude and latitude using ggplot2.
 #' @details The function loads the nycflights13 dataset, filters out missing latitude and longitude values, calculates the mean delay for each airport, and then creates a scatterplot.
-#' @seealso \code{\link{ggplot2}}
-#' @seealso \code{\link{nycflights13}}
 #' @return A ggplot2 plot visualizing the mean flight delay by airport location.
 #' @examples
 #' visualize_airport_delays()
 #' @import ggplot2
 #' @import dplyr
 #' @import nycflights13
+#' @importFrom magrittr %>%
 #' @export visualize_airport_delays
 #'
 visualize_airport_delays <- function() {
   # Load the nycflights13 dataset
-  data("flights")
-  data("airports")
+  flights <- nycflights13::flights
+  airports <- nycflights13::airports
 
   # Filter out rows with missing latitude and longitude
   airports <- airports %>%

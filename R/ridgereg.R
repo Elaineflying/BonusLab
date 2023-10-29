@@ -13,7 +13,7 @@
 #' ridgereg_mod_object$pred()
 #' ridgereg_mod_object$coef()
 #' ridgereg_mod_object$summary()
-#' @import plyr
+#' @import plyr::is.formula()
 #' @import ggplot2
 #' @import methods
 #' @export ridgereg
@@ -117,7 +117,7 @@ ridgereg <- setRefClass("ridgereg",fields=list(Formula="formula",
                           cat (paste0("\nResidual standard error: ", sqrt(ResidulVariance)," on ", DegreesofFreedom," degrees of freedom"))
                         },
                         predict = function (newdata, se.fit = FALSE, type = "response") {
-                          X_new <- as.matrix(newdata)
+                          X_new <- model.matrix(Formula, newdata)
                           fitted_values <- X_new %*% RidgeCoefficients
 
                           if (se.fit) {

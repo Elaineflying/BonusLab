@@ -1,0 +1,117 @@
+---
+title: "vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+devtools::install_github("Elaineflying/BonusLab", build_vignettes = TRUE)
+##devtools::load_all("~/Desktop/github/BonusLab")
+
+library(ridgereg)
+library(mlbench)
+library(caret)
+
+```
+
+### Import sample dataset boston housing 
+```{r}
+# Load the Boston Housing dataset
+data("BostonHousing")
+```
+
+### Divide the dataset into training and testing sets
+```{r}
+# Set a random seed for reproducibility
+set.seed(123)
+
+# Split the data into training (70%) and test (30%) sets
+trainIndex <- createDataPartition(BostonHousing$medv, p = 0.7, 
+                                  list = FALSE)
+trainData <- BostonHousing[trainIndex, ]
+testData <- BostonHousing[-trainIndex, ]
+```
+
+### Fit a linear regression model and a linear regression model with forward selection using the caret package.
+```{r}
+# Fit a linear regression model
+lm_model <- train(medv ~ ., data = trainData, method = "lm")
+
+# Fit a linear regression model with forward selection
+lm_fwd_model <- train(medv ~ ., data = trainData, method = "lmStepAIC")
+```
+
+### Evaluate model performance
+```{r}
+lm_train_predictions <- predict(lm_model, trainData)
+lm_fwd_train_predictions <- predict(lm_fwd_model, trainData)
+
+# Calculate RMSE for each model
+lm_rmse <- sqrt(mean((trainData$medv - lm_train_predictions)^2))
+lm_fwd_rmse <- sqrt(mean((trainData$medv - lm_fwd_train_predictions)^2))
+
+cat("Linear Regression RMSE on Training Data:", lm_rmse, "\n")
+cat("Linear Regression with Forward Selection RMSE on Training Data:", lm_fwd_rmse, "\n")
+```
+
+### fit a ridge regression model
+```{r}
+# Define a sequence of lambda values
+lambdas <- seq(0.01, 10, by = 0.1)
+
+# Fit ridge regression models for different lambda values
+formula <- paste0("medv ~ ", paste0(colnames(trainData)[-which(colnames(trainData) %in% c('medv'))], collapse = " + "))
+ridge_models <- lapply(lambdas, function(lambda) {
+  ridgereg_model <- ridgereg(formula = as.formula(formula), data = trainData, lambda)
+  return(ridgereg_model)
+})
+```
+
+### Find the best hyperparameter value
+```{r}
+# Create a function to compute RMSE
+rmse <- function(observed, predicted) {
+  return(sqrt(mean((observed - predicted)^2)))
+}
+
+# Perform 10-fold cross-validation
+cv_results <- lapply(ridge_models, function(model) {
+  predictions <- model$predict(newdata = trainData)
+  cv_rmse <- sqrt(mean((trainData$medv - predictions)^2))
+  return(cv_rmse)
+})
+
+# Find the index of the model with the lowest RMSE
+best_lambda_index <- which.min(cv_results)
+best_lambda <- lambdas[best_lambda_index]
+
+cat("The ridge regression model with lambda =", best_lambda, "performs well on the test data.")
+```
+
+### Evaluate model performance on test data
+```{r}
+# Predict using the best ridge regression model
+best_ridge_model <- ridge_models[[best_lambda_index]]
+ridge_test_predictions <- best_ridge_model$predict(newdata = testData)
+
+# Calculate RMSE for the best ridge regression model on test data
+ridge_test_rmse <- rmse(testData$medv, ridge_test_predictions)
+
+cat("Linear Regression RMSE on Test Data:", 
+    sqrt(mean((testData$medv - predict(lm_model, testData))^2)), "\n")
+cat("Linear Regression with Forward Selection RMSE on Test Data:", 
+    sqrt(mean((testData$medv - predict(lm_fwd_model, testData))^2)), "\n")
+cat("Ridge Regression (Best Lambda) RMSE on Test Data:", ridge_test_rmse, "\n")
+
+# According to the results, Linear Regression with Forward Selection performs well with smallest RMSE(it means the prediction results are more accurate compared with other two models. But this is only the one factor, should also consider other factors as well.
+```

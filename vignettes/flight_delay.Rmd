@@ -1,0 +1,123 @@
+---
+title: "flight_delay"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{flight_delay}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+devtools::install_github("Elaineflying/BonusLab")
+
+library(ridgereg)
+library(nycflights13)
+library(caret)
+library(dplyr)
+```
+
+### Import sample dataset boston housing 
+```{r}
+# Load the flights and weather datasets
+data("flights")
+data("weather")
+```
+
+### Data Preprocessing
+```{r}
+# Total delays = arr_delay + dep_delay
+# Remove unnecessary variables from the flights data (e.g., year, tailnum, etc.)
+flights$delay <- flights$arr_delay + flights$dep_delay
+flights_data <- subset(flights, select = -c(dep_time, sched_dep_time, arr_time, sched_arr_time, carrier, flight, tailnum, minute, year, month, day, hour, arr_delay, dep_delay))
+
+# Remove unnecessary variables from the weather data (e.g., year, tailnum, etc.)
+weather_data <- subset(weather, select = -c(year, month, day, hour))
+
+# Merge the weather data with the flights data 
+merged_data <- flights_data %>%
+    left_join(weather_data, by = c("origin" = "origin", "time_hour" = "time_hour" )) %>% na.omit() 
+
+# Pre analysis correlation
+nearZeroVar(merged_data)
+data.num <- Filter(is.numeric, merged_data)
+correlations <- cor(data.num)
+highCorr <- findCorrelation(correlations, cutoff = .40)
+colnames(data.num[,highCorr])
+# According to correlations the highly correlated variables are dewp, wind_gust, humid, visib and air_time
+# Keep dewp, wind_gust, humid, visib and air_time variables only
+merged_data <- subset(merged_data, select = c(dewp, humid, air_time, wind_gust, visib, delay))
+```
+
+### Data Splitting
+```{r}
+set.seed(123)  # For reproducibility
+
+# Split the data into train (80%), validation (15%), and test (5%)
+train_indexes <- createDataPartition(
+  y = seq_along(merged_data$delay),
+  p = 0.8,
+  list = FALSE
+)
+
+remaining_data <- merged_data[-train_indexes, ]
+
+validation_indexes <- createDataPartition(
+  y = seq_along(remaining_data$delay),
+  p = 0.15 / 0.2,
+  list = FALSE
+)
+test_indexes <- setdiff(seq_len(nrow(remaining_data)), validation_indexes)
+
+# Create the training, validation, and test sets
+train_data <- merged_data[train_indexes, ]
+validation_data <- remaining_data[validation_indexes, ]
+test_data <- remaining_data[test_indexes, ]
+
+```
+
+### Train Ridge Regression Models
+```{r}
+# Define a sequence of lambda values
+lambdas <- seq(0.01, 10, by = 0.1)
+
+# Train ridge regression models for different lambda values
+rmse_values <- numeric(length(lambdas))
+formula <- as.formula(paste0("delay ~ ", paste0(colnames(train_data)[-which(colnames(train_data) %in% c('delay'))], collapse = " + ")))
+
+for (i in 1:length(lambdas)) {
+  lambda <- lambdas[i]
+  ridge_model <- ridgereg(formula = formula, data = as.data.frame(train_data), lambda)
+
+  # Predict on the validation set
+  validation_predictions <- ridge_model$predict(newdata = validation_data)
+
+  # Calculate RMSE and store it in rmse_values
+  rmse_values[i] <- sqrt(mean((validation_data$delay - validation_predictions)^2))
+}
+```
+
+### Find the optimal value for lambda
+```{r}
+optimal_lambda <- lambdas[which.min(rmse_values)]
+cat("The ridge regression model with lambda =", optimal_lambda, "performs well on the validation data.")
+```
+
+### Predict on the test sets
+```{r}
+# Train the ridge regression model with the optimal lambda on the full training set
+final_model <- ridgereg(formula = formula, data = as.data.frame(train_data), optimal_lambda)
+
+# Predict on the test set
+test_predictions <- final_model$predict(newdata = test_data)
+
+# Calculate RMSE on the test set
+test_rmse <- sqrt(mean((test_data$delay - test_predictions)^2))
+cat("Ridge Regression (Best Lambda) RMSE on Test Data:", test_rmse, "\n")
+```

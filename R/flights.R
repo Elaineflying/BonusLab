@@ -24,7 +24,7 @@ visualize_airport_delays <- function() {
   airport_delays <- flights %>%
     left_join(airports, by = c("dest" = "faa")) %>%
     group_by(dest, lat, lon) %>%
-    summarize(mean_delay = mean(dep_delay, na.rm = TRUE))
+    summarize(mean_delay = mean(dep_delay+arr_delay, na.rm = TRUE))
 
   # Create a scatterplot using ggplot2
   ggplot(airport_delays, aes(x = lon, y = lat, color = mean_delay)) +

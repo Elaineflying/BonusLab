@@ -113,5 +113,7 @@ cat("Linear Regression with Forward Selection RMSE on Test Data:",
     sqrt(mean((testData$medv - predict(lm_fwd_model, testData))^2)), "\n")
 cat("Ridge Regression (Best Lambda) RMSE on Test Data:", ridge_test_rmse, "\n")
 
-# According to the results, Linear Regression with Forward Selection performs well with smallest RMSE(it means the prediction results are more accurate compared with other two models. But this is only the one factor, should also consider other factors as well.
+# According to the results, Linear Regression with Forward Selection performs well 
+# with smallest RMSE (it means the prediction results are more accurate compared with other two models). 
+# But this is only the one factor, should also consider other factors as well.
 ```

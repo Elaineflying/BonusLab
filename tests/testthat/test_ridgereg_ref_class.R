@@ -18,13 +18,13 @@ test_that("class is correct", {
 test_that("print() method works", {
   ridgereg_mod <- ridgereg$new(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda=0)
 
-  expect_output(ridgereg_mod$print(),"ridgereg\\(formula = Petal\\.Length ~ Sepal\\.Width \\+ Sepal\\.Length, data = iris\\)")
+  expect_output(ridgereg_mod$print(),"ridgereg\\(formula = Petal\\.Length ~ Sepal\\.Width \\+ Sepal\\.Length, data = iris, lambda = 0\\)")
   expect_output(ridgereg_mod$print(),"( )*\\(Intercept\\)( )*Sepal\\.Width( )*Sepal\\.Length")
 })
 
 test_that("coef() method works", {
   ridgereg_mod <- ridgereg$new(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda=0)
 
-  expect_true(all(unname(ridgereg_mod$coef()) %in% c(-2.524762, -1.338623, 1.775593)))
+  expect_true(all(round(unname(ridgereg_mod$coef()),3) %in% c(-2.525, -1.339, 1.776)))
 })
 

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-devtools::install_github("Elaineflying/BonusLab")
+devtools::install_github("Elaineflying/BonusLab", build_vignettes = TRUE)
 
 library(ridgereg)
 library(nycflights13)

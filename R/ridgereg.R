@@ -13,7 +13,7 @@
 #' ridgereg_mod_object$pred()
 #' ridgereg_mod_object$coef()
 #' ridgereg_mod_object$summary()
-#' @import plyr::is.formula()
+#' @importFrom plyr is.formula
 #' @import ggplot2
 #' @import methods
 #' @export ridgereg

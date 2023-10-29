@@ -1,0 +1,40 @@
+---
+title: "my-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+devtools::install_github("Elaineflying/BonusLab", build_vignettes = TRUE)
+library(ridgereg)
+```
+
+### import sample dataset iris
+```{r}
+data(iris)
+```
+
+### create a ridgereg mode object using ridgereg@new function
+```{r}
+ridgereg_mod_object <- ridgereg$new(Petal.Length~Species, data = iris)
+```
+
+### print the coefficients and coefficient names according to multiple regression model
+```{r}
+ridgereg_mod_object$print()
+```
+
+### print the coefficients
+```{r}
+ridgereg_mod_object$coef()
+```

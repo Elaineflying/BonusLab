@@ -1,0 +1,31 @@
+Package: ridgereg
+Type: Package
+Title: This package is for R Programming Advanced ML bonus lab which is a multiple regression model 
+Version: 0.1.0
+Date: 2023-09-30
+Authors@R: c(person("Xuan", "Developer", role = c("aut", "cre"),
+                     email = "xuawa284@student.liu.se"),
+              person("Ashen", "Developer", role = "ctb",
+                     email = "thawe276@student.liu.se"))
+Author: Ashen Developer, Xuan Developer
+Maintainer: Ashen Developer <thawe276@student.liu.se>
+Description: This is a Multiple Linear Regression model.
+License: GPL (>= 2)
+Encoding: UTF-8
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 2.10)
+Imports:
+    plyr,
+    dplyr,
+    nycflights13,
+    ggplot2,
+    methods
+Suggests: 
+    knitr,
+    rmarkdown,
+    markdown,
+    devtools,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr

@@ -2,8 +2,8 @@
 % Please edit documentation in R/ridgereg-package.R
 \docType{package}
 \name{ridgereg-package}
-\alias{ridgereg}
 \alias{ridgereg-package}
+\alias{_PACKAGE}
 \title{ridgereg: This package is for R Programming Advanced ML bonus lab which is a multiple regression model}
 \description{
 This is a Multiple Linear Regression model.
